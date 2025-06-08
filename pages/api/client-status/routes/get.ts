@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ClientController } from '../../../../controllers/ClientController';
+import { ApiError } from '@/types';
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,8 +9,8 @@ export default async function handler(
   try {
     const result = await ClientController.getAllStatus();
     return res.status(200).json(result);
-  } catch (err: any) {
-    console.error('[API] Erro ao buscar status dos clientes:', err);
-    return res.status(500).json({ error: err.message });
+  } catch (err) {
+    const error = err as Error;
+    return res.status(500).json({ message: error.message } as ApiError);
   }
 }
