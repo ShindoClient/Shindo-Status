@@ -1,22 +1,5 @@
 import { db, admin } from '@/firebase/firebase';
-
-type ClientStatus = {
-  uuid: string;
-  name: string;
-  accountType: string;
-  eventType: string;
-  timestamp: Date;
-};
-
-enum EVENT_TYPES {
-  LOGIN = 'login',
-  LOGOUT = 'logout',
-  REGISTER = 'register',
-  UPDATE = 'update',
-  JOIN = 'join',
-  LEAVE = 'leave',
-}
-
+import { EVENT_TYPES } from '@/types';
 export class ClientController {
   private static readonly COLLECTION = 'users';
 
