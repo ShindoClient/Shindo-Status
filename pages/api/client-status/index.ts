@@ -1,6 +1,6 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import getHandler from "./routes/get";
-import postHandler from "./routes/post";
+import { NextApiRequest, NextApiResponse } from 'next';
+import getHandler from './routes/get';
+import postHandler from './routes/post';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,11 +9,11 @@ export default async function handler(
   const { method } = req;
 
   switch (method) {
-    case "GET":
+    case 'GET':
       return getHandler(req, res);
-    case "POST":
+    case 'POST':
       return postHandler(req, res);
     default:
-      return res.status(405).json({ message: "Método não permitido." });
+      return res.status(405).json({ message: 'Método não permitido.' });
   }
 }
