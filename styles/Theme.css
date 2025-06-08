@@ -1,0 +1,166 @@
+:root {
+  --background: #18181b;
+  --foreground: #f4f4f5;
+  --card-bg: #23232b;
+  --card-border-radius: 18px;
+  --card-shadow: 0 4px 24px #0006;
+  --gold: #fbbf24;
+  --diamond: #22d3ee;
+  --staff: #ef4444;
+  --member: #a1a1aa;
+  --font-main: 'Segoe UI', Arial, sans-serif;
+  --font-digital: 'Orbitron', 'Courier New', monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-main);
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-main);
+  padding: 32px 8px;
+}
+
+.titleCard {
+  background: var(--card-bg);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  padding: 24px 32px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto 32px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  color: var(--gold);
+  margin-bottom: 2px;
+  letter-spacing: 2px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--gold) 40%, #f59e42 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 12px #000a, 0 1px 0 #fff2;
+  text-align: center;
+  width: 100%;
+  padding: 8px 0;
+  font-family: var(--font-digital);
+  line-height: 1.1;
+  transition: all 0.2s;
+}
+
+.logoWrapper {
+  margin: 0 0 32px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.logo {
+  border-radius: 16px;
+  background: #23232b;
+  padding: 8px;
+  box-shadow: 0 4px 24px #0004;
+}
+
+.cardsRow {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+
+.playerCard {
+  background: var(--card-bg);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  padding: 24px 20px;
+  min-width: 320px;
+  max-width: 340px;
+  width: 340px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border: 2px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.playerCardStaff { border-color: var(--staff); }
+.playerCardDiamond { border-color: var(--diamond); }
+.playerCardGold { border-color: var(--gold); }
+.playerCardMember { border-color: var(--member); }
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  width: 100%;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding-bottom: 8px;
+}
+
+.cardLabel {
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 90px;
+  text-align: left;
+  flex: 0 0 90px;
+}
+
+.cardCounter {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.cardIcon {
+  flex: 0 0 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.cardList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.cardListItem {
+  background: #27272a;
+  margin: 0 0 8px 0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--foreground);
+  box-shadow: 0 2px 8px #0002;
+  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
