@@ -1,4 +1,5 @@
 import { db, admin } from '@/firebase/firebase';
+import { UpdateData } from '@/types';
 import { EVENT_TYPES } from '@/types';
 export class ClientController {
   private static readonly COLLECTION = 'users';
@@ -11,12 +12,16 @@ export class ClientController {
         ...doc.data(),
       }));
     } catch (err) {
-      console.error('[API] Erro ao buscar status dos clientes:', err);
-      throw err;
+      throw new Error(`[API] Erro ao buscar status dos clientes: ${err}`);
     }
   }
 
-  static async handleClientEvent(uuid: string, name: string, accountType: string, eventType: string) {
+  static async handleClientEvent(
+    uuid: string,
+    name: string,
+    accountType: string,
+    eventType: string
+  ) {
     const userRef = db.collection(this.COLLECTION).doc(uuid);
     const snapshot = await userRef.get();
 
@@ -29,8 +34,7 @@ export class ClientController {
 
       return { success: true };
     } catch (err) {
-      console.error('[API] Erro ao registrar evento do cliente:', err);
-      throw err;
+      throw new Error(`[API] Erro ao registrar evento do cliente: ${err}`);
     }
   }
 
@@ -45,7 +49,10 @@ export class ClientController {
     return snapshot.data();
   }
 
-  private static async updateExistingUser(userRef: FirebaseFirestore.DocumentReference, eventType: string) {
+  private static async updateExistingUser(
+    userRef: FirebaseFirestore.DocumentReference,
+    eventType: string
+  ) {
     const updateData = this.getUpdateDataForEvent(eventType);
     await userRef.update(updateData);
   }
@@ -61,15 +68,21 @@ export class ClientController {
         accountType,
         privileges: [],
         online: eventType === EVENT_TYPES.JOIN,
-        lastJoin: eventType === EVENT_TYPES.JOIN ? admin.firestore.FieldValue.serverTimestamp() : null,
-        lastLeave: eventType === EVENT_TYPES.LEAVE ? admin.firestore.FieldValue.serverTimestamp() : null,
+        lastJoin:
+          eventType === EVENT_TYPES.JOIN
+            ? admin.firestore.FieldValue.serverTimestamp()
+            : null,
+        lastLeave:
+          eventType === EVENT_TYPES.LEAVE
+            ? admin.firestore.FieldValue.serverTimestamp()
+            : null,
       },
       { merge: true }
     );
   }
 
-  private static getUpdateDataForEvent(eventType: string) {
-    const updateData: any = {};
+  private static getUpdateDataForEvent(eventType: string): UpdateData {
+    const updateData: UpdateData = {};
 
     if (eventType === EVENT_TYPES.JOIN) {
       updateData.lastJoin = admin.firestore.FieldValue.serverTimestamp();
