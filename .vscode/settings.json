@@ -13,5 +13,8 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.rulers": [80, 120],
   "editor.wordWrapColumn": 120,
-  "editor.wordWrap": "on"
+  "editor.wordWrap": "on",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  }
 }

@@ -52,6 +52,7 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   background: linear-gradient(90deg, var(--gold) 40%, #f59e42 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 2px 12px #000a, 0 1px 0 #fff2;
