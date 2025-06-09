@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
 import styles from '../styles/Home.module.css';
-import { queryObjects } from 'v8';
 import {
   ALL_BENEFITS,
-  BENEFIT_GROUPS,
   getDisplayBenefits,
 } from '../controllers/BenefitsController';
 
@@ -216,8 +214,8 @@ export default function Home() {
     ];
 
     // Ordena: presentes primeiro
-    let presentBenefits = ALL_BENEFITS.filter(b => benefits.includes(b));
-    let absentBenefits = ALL_BENEFITS.filter(b => !benefits.includes(b));
+    const presentBenefits = ALL_BENEFITS.filter(b => benefits.includes(b));
+    const absentBenefits = ALL_BENEFITS.filter(b => !benefits.includes(b));
     let orderedBenefits = [...presentBenefits, ...absentBenefits];
 
     if (isStaff) {
