@@ -94,4 +94,35 @@ export class ClientController {
 
     return updateData;
   }
+
+  static async updateLastSeen(uuid: string) {
+    const userRef = db.collection(this.COLLECTION).doc(uuid);
+    const snapshot = await userRef.get();
+
+    if (!snapshot.exists) {
+      throw new Error(`Usuário ${uuid} não encontrado`);
+    }
+
+    await userRef.update({
+      lastSeen: admin.firestore.FieldValue.serverTimestamp(),
+      online: true // garante que esteja online após o ping
+    });
+  }
+
+  static async markOfflineIfInactive(thresholdMs: number) {
+    const now = Date.now();
+    const snapshot = await db.collection(this.COLLECTION).get();
+
+    snapshot.forEach(async (doc) => {
+      const data = doc.data();
+      const lastSeen = data.lastSeen?.toDate?.() || null;
+
+      if (lastSeen && now - lastSeen.getTime() > thresholdMs && data.online) {
+        await db.collection(this.COLLECTION).doc(doc.id).update({
+          online: false
+        });
+        console.log(`[KEEPALIVE] ${doc.id} marcado como offline`);
+      }
+    });
+  }
 }

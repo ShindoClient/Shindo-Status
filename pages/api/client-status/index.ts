@@ -1,7 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import getHandler from './routes/get';
 import postHandler from './routes/post';
+import { KeepAliveJob } from '../../../controllers/KeepAliveJob';
 
+KeepAliveJob.start();
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
