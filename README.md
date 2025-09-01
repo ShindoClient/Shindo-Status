@@ -66,7 +66,7 @@
 
 3. Configure as variáveis de ambiente:
    ```bash
-   cp .env.example .env
+   cp .env .env
    # Edite o arquivo .env com suas configurações
    ```
 
