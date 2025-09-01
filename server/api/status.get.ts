@@ -2,39 +2,57 @@ import type { H3Event } from 'h3'
 
 const BASE = process.env.NUXT_PUBLIC_WS_ADMIN_BASE || ''
 
+// Configuração CORS
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Max-Age': '86400' // 24 hours
+}
+
+// Handler para requisições OPTIONS (pré-voo CORS)
+if (import.meta.handlers) {
+  import.meta.handlers.options = (event: H3Event) => {
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: ''
+    }
+  }
+}
+
 async function safeFetch(url: string, init?: RequestInit) {
   const t0 = Date.now()
   try {
-    const res = await fetch(url, { cache: 'no-store', ...init } as any)
+    const res = await fetch(url, { 
+      ...init,
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(init?.headers || {})
+      }
+    } as any)
+    
     const latency = Date.now() - t0
     if (!res.ok) return { ok: false, latency, data: null }
+    
     const data = await res.json().catch(() => ({}))
     return { ok: true, latency, data }
-  } catch {
+  } catch (error) {
+    console.error('Erro no safeFetch:', error)
     return { ok: false, latency: Date.now() - t0, data: null }
   }
 }
 
-// Configura headers para evitar cache
-const noCacheHeaders = {
-  'Cache-Control': 'no-cache, no-store, must-revalidate',
-  'Pragma': 'no-cache',
-  'Expires': '0'
-}
-
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  'Cache-Control': 'no-cache, no-store, must-revalidate',
-  'Pragma': 'no-cache',
-  'Expires': '0',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type'
-}
-
 export default defineEventHandler(async (event: H3Event) => {
   // Configura os headers de resposta
-  setResponseHeaders(event, defaultHeaders)
+  setResponseHeaders(event, {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    ...corsHeaders
+  })
 
   if (!BASE) {
     return {

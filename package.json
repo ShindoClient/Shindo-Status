@@ -27,6 +27,7 @@
     "@vitejs/plugin-vue-jsx": "^5.1.1",
     "@vue/compiler-sfc": "^3.5.20",
     "@vue/runtime-dom": "^3.5.20",
+    "nitropack": "^2.12.4",
     "typescript": "^5.9.2",
     "vue-tsc": "^3.0.6"
   }
