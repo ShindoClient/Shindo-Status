@@ -1,25 +1,28 @@
 {
   "name": "shindo-api",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate",
+    "preinstall": "pnpm approve-builds esbuild @parcel/watcher vue-demi"
   },
   "dependencies": {
-    "firebase-admin": "^12.6.0",
-    "next": "14.2.19",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "swr": "^2.2.5"
-  },
-  "engines": {
-    "node": ">=18"
+    "@vueuse/core": "^11.3.0",
+    "@vueuse/motion": "^2.2.6",
+    "autoprefixer": "^10.4.21",
+    "h3": "^1.15.4",
+    "lucide-vue-next": "^0.542.0",
+    "nuxt": "^3.18.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
-    "@types/react": "^19.1.11",
-    "typescript": "^5.9.2"
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2",
+    "vue-tsc": "^3.0.6"
   }
 }
