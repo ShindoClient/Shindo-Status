@@ -3,13 +3,23 @@ import { Users } from 'lucide-vue-next'
 import Sparkline from '~/components/charts/Sparkline.vue'
 import BaseCard from './BaseCard.vue'
 
-const props = defineProps<{ 
-  loading: boolean, 
-  count: number, 
-  series?: { t: number, count: number }[] 
-}>()
+const props = withDefaults(defineProps<{ 
+  loading?: boolean, 
+  count?: number, 
+  series?: Array<{ t: number, count: number }> 
+}>(), {
+  loading: false,
+  count: 0,
+  series: () => []
+})
 
-const last = computed(() => props.count ?? 0)
+const last = computed(() => {
+  const count = Number(props.count)
+  return isNaN(count) ? 0 : Math.max(0, count)
+})
+
+// Garante que series é sempre um array
+const safeSeries = computed(() => Array.isArray(props.series) ? props.series : [])
 </script>
 
 <template>
@@ -26,7 +36,7 @@ const last = computed(() => props.count ?? 0)
     <div class="flex flex-col h-full">
       <div class="flex items-end gap-2">
         <div class="text-4xl font-bold tracking-tight text-white">
-          {{ loading ? '—' : last }}
+          {{ loading || last === undefined ? '—' : last }}
         </div>
         <div class="mb-1 text-sm text-white/60">
           {{ last === 1 ? 'jogador' : 'jogadores' }}
@@ -36,7 +46,7 @@ const last = computed(() => props.count ?? 0)
       <div class="mt-6">
         <div class="h-16 -mx-2">
           <Sparkline
-            :points="(series || []).map(p => p.count)"
+            :points="safeSeries.map(p => p?.count || 0)"
             :height="64"
             :stroke-width="2"
             class="opacity-90"
