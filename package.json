@@ -8,8 +8,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "vercel-build": "pnpm install && nuxt build",
-    "preinstall": "pnpm approve-builds esbuild @parcel/watcher vue-demi"
+    "vercel-build": "nuxt build"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",
