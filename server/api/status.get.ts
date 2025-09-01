@@ -34,20 +34,13 @@ export default defineEventHandler(async (event: H3Event) => {
     }
   }
 
-  const base = 'https://ws.shindoclient.com'
+  const base = BASE.replace(/\/$/, '')
 
   const healthUrl = `${base}/v1/health`
   let health = { ok: false, startedAt: undefined as string | undefined, uptimeMs: undefined as number | undefined }
   let latencyMs: number | null = null
 
   try {
-    // Primeiro fazemos uma requisição HEAD para verificar se o endpoint está disponível
-    const headResponse = await fetch(healthUrl, { 
-      method: 'HEAD', 
-      cache: 'no-store' 
-    } as any)
-    
-    if (headResponse.ok) {
       // Se o HEAD funcionar, fazemos uma requisição GET para pegar os dados
       const startTime = Date.now()
       const response = await fetch(healthUrl, { 
@@ -70,7 +63,6 @@ export default defineEventHandler(async (event: H3Event) => {
           health = { ok: false, startedAt: undefined, uptimeMs: undefined }
         }
       }
-    }
   } catch (error) {
     console.error('Erro ao acessar o endpoint de health:', error)
     const cu = await safeFetch(`${base}/v1/connected-users`)
