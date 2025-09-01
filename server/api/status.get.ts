@@ -1,6 +1,5 @@
 import type { H3Event } from 'h3'
 
-const BASE = process.env.NUXT_PUBLIC_WS_ADMIN_BASE || ''
 
 async function safeFetch(url: string, init?: RequestInit) {
   const t0 = Date.now()
@@ -35,15 +34,6 @@ const defaultHeaders = {
 export default defineEventHandler(async (event: H3Event) => {
   // Configura os headers de resposta
   setResponseHeaders(event, defaultHeaders)
-    
-  if (!BASE) {
-    return {
-      health: { ok: false },
-      players: { count: 0 },
-      latencyMs: null,
-      note: 'Defina NUXT_PUBLIC_WS_ADMIN_BASE no ambiente.'
-    }
-  }
 
   const base = 'https://ws.shindoclient.com'
 
