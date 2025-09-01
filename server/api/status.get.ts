@@ -22,9 +22,20 @@ const noCacheHeaders = {
   'Expires': '0'
 }
 
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'X-Requested-With, Content-Type'
+}
+
 export default defineEventHandler(async (event: H3Event) => {
   // Configura os headers de resposta
-  setResponseHeaders(event, noCacheHeaders)
+  setResponseHeaders(event, defaultHeaders)
+    
   if (!BASE) {
     return {
       health: { ok: false },
