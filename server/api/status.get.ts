@@ -34,7 +34,7 @@ export default defineEventHandler(async (event: H3Event) => {
     }
   }
 
-  const base = BASE.replace(/\/$/, '')
+  const base = 'https://ws.shindoclient.com'
 
   const healthUrl = `${base}/v1/health`
   let health = { ok: false, startedAt: undefined as string | undefined, uptimeMs: undefined as number | undefined }
