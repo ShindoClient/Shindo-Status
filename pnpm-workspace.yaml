@@ -1,4 +1,9 @@
+# This is a single package project, not a monorepo
+packages:
+  - '.'  # root package
+
+# Ignore specific build dependencies
 ignoredBuiltDependencies:
   - '@parcel/watcher'
-  - esbuild
-  - vue-demi
+  - 'esbuild'
+  - 'vue-demi'
