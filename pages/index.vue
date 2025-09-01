@@ -6,8 +6,20 @@ import LatencyCard from '~/components/cards/LatencyCard.vue'
 import { useStatus } from '~/composables/useStatus'
 import { useStatusHistory } from '~/composables/useStatusHistory'
 
-const { data, pending, refresh, error } = await useStatus({ lazy: false, server: true })
+// Garante que os dados iniciais tenham a estrutura correta
+const defaultData = {
+  health: { ok: false },
+  players: { count: 0 },
+  latencyMs: null
+}
+
+const { data = ref(defaultData), pending, refresh, error } = await useStatus({ lazy: false, server: true })
 const { players, latency } = useStatusHistory(data, pending)
+
+// Função segura para obter o contador de jogadores
+const playerCount = computed(() => {
+  return data.value?.players?.count ?? 0
+})
 </script>
 
 <template>
@@ -71,7 +83,11 @@ const { players, latency } = useStatusHistory(data, pending)
 
     <section class="grid gap-6 md:grid-cols-3 mt-8">
       <UptimeCard :loading="pending" :data="data?.health" />
-      <PlayersCard :loading="pending" :count="data?.players.count ?? 0" :series="players.map(p => ({ t: p.t, count: p.count }))" />
+      <PlayersCard 
+        :loading="pending" 
+        :count="playerCount"
+        :series="players || []"
+      />
       <LatencyCard :loading="pending" :latency-ms="(data?.latencyMs ?? null) as any" />
     </section>
 

@@ -3,23 +3,39 @@ import { Users } from 'lucide-vue-next'
 import Sparkline from '~/components/charts/Sparkline.vue'
 import BaseCard from './BaseCard.vue'
 
+interface Point {
+  t: number
+  count: number
+  latency?: number | null
+}
+
 const props = withDefaults(defineProps<{ 
   loading?: boolean, 
   count?: number, 
-  series?: Array<{ t: number, count: number }> 
+  series?: Point[] 
 }>(), {
   loading: false,
   count: 0,
   series: () => []
 })
 
+// Garante que o valor seja um número válido
 const last = computed(() => {
+  if (props.loading) return 0
   const count = Number(props.count)
-  return isNaN(count) ? 0 : Math.max(0, count)
+  return isFinite(count) ? Math.max(0, count) : 0
 })
 
-// Garante que series é sempre um array
-const safeSeries = computed(() => Array.isArray(props.series) ? props.series : [])
+// Garante que series é sempre um array de pontos válidos
+const safeSeries = computed(() => {
+  if (!Array.isArray(props.series)) return []
+  return props.series
+    .map(p => ({
+      t: p?.t || 0,
+      count: typeof p?.count === 'number' ? Math.max(0, p.count) : 0
+    }))
+    .filter(Boolean)
+})
 </script>
 
 <template>
