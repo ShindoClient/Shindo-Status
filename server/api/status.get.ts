@@ -15,7 +15,16 @@ async function safeFetch(url: string, init?: RequestInit) {
   }
 }
 
+// Configura headers para evitar cache
+const noCacheHeaders = {
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+}
+
 export default defineEventHandler(async (event: H3Event) => {
+  // Configura os headers de resposta
+  setResponseHeaders(event, noCacheHeaders)
   if (!BASE) {
     return {
       health: { ok: false },
@@ -57,5 +66,10 @@ export default defineEventHandler(async (event: H3Event) => {
   const users = await safeFetch(`${base}/v1/connected-users`)
   const count = users.ok && (users.data as any)?.users ? Number((users.data as any).users.length) : 0
 
-  return { health, players: { count }, latencyMs }
+  return {
+    health,
+    players: { count },
+    latencyMs,
+    timestamp: new Date().toISOString() // Adiciona um timestamp para garantir respostas únicas
+  }
 })
