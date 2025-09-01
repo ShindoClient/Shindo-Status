@@ -36,31 +36,46 @@ export default defineEventHandler(async (event: H3Event) => {
 
   const base = BASE.replace(/\/$/, '')
 
-  // tenta health (HEAD)
   const healthUrl = `${base}/v1/health`
-  let hasHealth = false
-  try {
-    const h = await fetch(healthUrl, { method: 'HEAD', cache: 'no-store' } as any)
-    hasHealth = h.ok
-  } catch {}
-
-  let health = { ok: false as boolean, startedAt: undefined as string | undefined, uptimeMs: undefined as number | undefined }
+  let health = { ok: false, startedAt: undefined as string | undefined, uptimeMs: undefined as number | undefined }
   let latencyMs: number | null = null
 
-  if (hasHealth) {
-    const h = await safeFetch(healthUrl)
-    latencyMs = h.latency
-    if (h.ok && h.data) {
-      const startedAt = h.data.startedAt || undefined
-      const uptimeMs = typeof h.data.uptimeMs === 'number' ? h.data.uptimeMs : undefined
-      health = { ok: true, startedAt, uptimeMs }
-    } else {
-      health = { ok: false, startedAt: undefined, uptimeMs: undefined }
+  try {
+    // Primeiro fazemos uma requisição HEAD para verificar se o endpoint está disponível
+    const headResponse = await fetch(healthUrl, { 
+      method: 'HEAD', 
+      cache: 'no-store' 
+    } as any)
+    
+    if (headResponse.ok) {
+      // Se o HEAD funcionar, fazemos uma requisição GET para pegar os dados
+      const startTime = Date.now()
+      const response = await fetch(healthUrl, { 
+        cache: 'no-store' 
+      } as any)
+      
+      latencyMs = Date.now() - startTime
+      
+      if (response.ok) {
+        try {
+          const data = await response.json()
+          // Extrai os valores corretamente baseado na resposta fornecida
+          health = {
+            ok: data?.ok === true || data === true,
+            startedAt: data?.startedAt || undefined,
+            uptimeMs: typeof data?.uptimeMs === 'number' ? data.uptimeMs : undefined
+          }
+        } catch (e) {
+          console.error('Erro ao processar resposta do health:', e)
+          health = { ok: false, startedAt: undefined, uptimeMs: undefined }
+        }
+      }
     }
-  } else {
+  } catch (error) {
+    console.error('Erro ao acessar o endpoint de health:', error)
     const cu = await safeFetch(`${base}/v1/connected-users`)
     latencyMs = cu.latency
-    health = { ok: cu.ok, startedAt: undefined, uptimeMs: undefined }
+    health = { ok: false, startedAt: undefined, uptimeMs: undefined }
   }
 
   const users = await safeFetch(`${base}/v1/connected-users`)
