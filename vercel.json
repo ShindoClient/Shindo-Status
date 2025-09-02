@@ -10,13 +10,5 @@
         "Access-Control-Allow-Headers": "Content-Type"
       }
     }
-  ],
-  "functions": {
-    "status.get.ts": {
-      "maxDuration": 60
-    },
-    "*.[tj]s": {
-      "maxDuration": 60
-    }
-  }
+  ]
 }
