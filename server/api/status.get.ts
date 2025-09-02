@@ -24,7 +24,8 @@ if (import.meta.handlers) {
 async function safeFetch(url: string, init?: RequestInit) {
   const t0 = Date.now()
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+  // Increased timeout to 55s to accommodate Render's free tier cold starts
+  const timeout = setTimeout(() => controller.abort(), 55000) // 55 second timeout
 
   try {
     const res = await fetch(url, { 
