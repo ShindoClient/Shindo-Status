@@ -8,7 +8,8 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "vercel-build": "nuxt build"
+    "vercel-build": "nuxt build",
+    "release": "nuxt build && npx vercel deploy --prebuilt"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",

@@ -66,3 +66,4 @@ Thumbs.db
 # pnpm
 .pnpm-store/
 node_modules/.pnpm-debug.log
+.vercel
