@@ -12,10 +12,10 @@
     }
   ],
   "functions": {
-    "server/api/status.get.ts": {
+    "status.get.ts": {
       "maxDuration": 60
     },
-    "server/api/*.[tj]s": {
+    "*.[tj]s": {
       "maxDuration": 60
     }
   }
