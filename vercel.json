@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/status",
+      "dest": "/api/status"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/status"
+    }
+  ]
+}
