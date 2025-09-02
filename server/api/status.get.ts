@@ -23,9 +23,13 @@ if (import.meta.handlers) {
 
 async function safeFetch(url: string, init?: RequestInit) {
   const t0 = Date.now()
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
   try {
     const res = await fetch(url, { 
       ...init,
+      signal: controller.signal,
       cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
@@ -33,19 +37,45 @@ async function safeFetch(url: string, init?: RequestInit) {
       }
     } as any)
     
+    clearTimeout(timeout)
     const latency = Date.now() - t0
-    if (!res.ok) return { ok: false, latency, data: null }
+    
+    if (!res.ok) {
+      console.error(`Error in safeFetch: ${res.status} ${res.statusText}`)
+      return { ok: false, latency, data: null }
+    }
     
     const data = await res.json().catch(() => ({}))
     return { ok: true, latency, data }
-  } catch (error) {
-    console.error('Erro no safeFetch:', error)
-    return { ok: false, latency: Date.now() - t0, data: null }
+  } catch (error: any) {
+    clearTimeout(timeout)
+    const latency = Date.now() - t0
+    console.error(`Error in safeFetch (${url}):`, error.message)
+    return { 
+      ok: false, 
+      latency,
+      data: null,
+      error: error.name === 'AbortError' ? 'Request timed out' : error.message
+    }
   }
 }
 
+// Add a helper function to handle CORS preflight
+const handleCorsPreflight = (event: H3Event) => {
+  if (event.node.req.method === 'OPTIONS') {
+    event.node.res.statusCode = 204
+    event.node.res.setHeader('Content-Length', '0')
+    event.node.res.end()
+    return true
+  }
+  return false
+}
+
 export default defineEventHandler(async (event: H3Event) => {
-  // Configura os headers de resposta
+  // Handle CORS preflight
+  if (handleCorsPreflight(event)) return
+  
+  // Set response headers
   setResponseHeaders(event, {
     'Content-Type': 'application/json',
     'Cache-Control': 'no-store, no-cache, must-revalidate',
@@ -55,11 +85,15 @@ export default defineEventHandler(async (event: H3Event) => {
   })
 
   if (!BASE) {
+    console.error('NUXT_PUBLIC_WS_ADMIN_BASE environment variable is not set')
     return {
-      health: { ok: false },
+      health: { 
+        ok: false,
+        error: 'Configuration error: NUXT_PUBLIC_WS_ADMIN_BASE not set'
+      },
       players: { count: 0 },
       latencyMs: null,
-      note: 'Defina NUXT_PUBLIC_WS_ADMIN_BASE no ambiente.'
+      timestamp: new Date().toISOString()
     }
   }
 
