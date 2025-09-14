@@ -1,59 +1,176 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
+
 const props = withDefaults(defineProps<{
   points: number[]
-  width?: number
-  height?: number
+  width?: number | string
+  height?: number | string
+  color?: string
+  fillColor?: string
   strokeWidth?: number
   smooth?: boolean
 }>(), {
-  width: 400,
-  height: 56,
+  width: '100%',
+  height: '100%',
+  color: '#3b82f6',
+  fillColor: 'rgba(59, 130, 246, 0.1)',
   strokeWidth: 2,
   smooth: true
 })
 
-const pathD = computed(() => {
-  const pts = props.points
-  const n = pts.length
-  if (!n) return ''
-  const w = props.width
-  const h = props.height
-  const max = Math.max(...pts, 1)
-  const min = Math.min(...pts, 0)
-  const range = Math.max(max - min, 1)
-  const stepX = n > 1 ? w / (n - 1) : w
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const canvasWidth = ref(0)
+const canvasHeight = ref(0)
+let observer: ResizeObserver | null = null
 
-  const toY = (v: number) => {
-    const y = h - ((v - min) / range) * (h - 6) - 3 // padding 3px
-    return isFinite(y) ? y : h / 2
+const containerStyle = computed(() => ({
+  width: typeof props.width === 'number' ? `${props.width}px` : props.width,
+  height: typeof props.height === 'number' ? `${props.height}px` : props.height,
+  position: 'relative'
+}))
+
+const drawSparkline = () => {
+  const canvas = canvasRef.value
+  if (!canvas) return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  const { points } = props
+  if (!points.length) return
+
+  const width = canvas.width = canvas.offsetWidth * 2
+  const height = canvas.height = canvas.offsetHeight * 2
+  const padding = 2
+
+  // Set canvas display size
+  canvas.style.width = '100%'
+  canvas.style.height = '100%'
+
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height)
+
+  // Calculate points
+  const max = Math.max(...points)
+  const min = Math.min(...points)
+  const range = max - min || 1
+
+  const step = width / (points.length - 1 || 1)
+
+  // Draw area
+  ctx.beginPath()
+  ctx.moveTo(0, height)
+
+  points.forEach((point, i) => {
+    const x = i * step
+    const y = height - ((point - min) / range * (height - padding * 2) + padding)
+
+    if (i === 0) {
+      ctx.moveTo(x, y)
+    } else if (props.smooth && i < points.length - 1) {
+      const nextX = (i + 1) * step
+      const nextY = height - ((points[i + 1] - min) / range * (height - padding * 2) + padding)
+      const cp1x = x + (nextX - x) * 0.3
+      const cp1y = y
+      const cp2x = x + (nextX - x) * 0.7
+      const cp2y = nextY
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, nextX, nextY)
+    } else {
+      ctx.lineTo(x, y)
+    }
+  })
+
+  // Close the path for the fill
+  ctx.lineTo(width, height)
+  ctx.closePath()
+
+  // Fill the area
+  const gradient = ctx.createLinearGradient(0, 0, 0, height)
+  gradient.addColorStop(0, props.fillColor)
+  gradient.addColorStop(1, 'rgba(59, 130, 246, 0)')
+
+  ctx.fillStyle = gradient
+  ctx.fill()
+
+  // Draw the line
+  ctx.beginPath()
+  points.forEach((point, i) => {
+    const x = i * step
+    const y = height - ((point - min) / range * (height - padding * 2) + padding)
+
+    if (i === 0) {
+      ctx.moveTo(x, y)
+    } else if (props.smooth && i < points.length - 1) {
+      const nextX = (i + 1) * step
+      const nextY = height - ((points[i + 1] - min) / range * (height - padding * 2) + padding)
+      const cp1x = x + (nextX - x) * 0.3
+      const cp1y = y
+      const cp2x = x + (nextX - x) * 0.7
+      const cp2y = nextY
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, nextX, nextY)
+    } else {
+      ctx.lineTo(x, y)
+    }
+  })
+
+  ctx.strokeStyle = props.color
+  ctx.lineWidth = props.strokeWidth
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.stroke()
+}
+
+const handleResize = () => {
+  if (canvasRef.value) {
+    canvasWidth.value = canvasRef.value.offsetWidth
+    canvasHeight.value = canvasRef.value.offsetHeight
+    drawSparkline()
+  }
+}
+
+onMounted(() => {
+  // Initial draw
+  requestAnimationFrame(() => {
+    handleResize()
+  })
+
+  // Set up resize observer
+  if (canvasRef.value) {
+    observer = new ResizeObserver(handleResize)
+    observer.observe(canvasRef.value.parentElement || document.body)
   }
 
-  let d = `M 0 ${toY(pts[0])}`
-  if (!props.smooth) {
-    for (let i = 1; i < n; i++) d += ` L ${i * stepX} ${toY(pts[i])}`
-    return d
-  }
-  // smooth with simple quadratic beziers
-  for (let i = 1; i < n; i++) {
-    const x = i * stepX
-    const y = toY(pts[i])
-    const prevX = (i - 1) * stepX
-    const prevY = toY(pts[i - 1])
-    const cx = (prevX + x) / 2
-    d += ` Q ${cx} ${prevY} ${x} ${y}`
-  }
-  return d
+  window.addEventListener('resize', handleResize)
 })
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect()
+  }
+  window.removeEventListener('resize', handleResize)
+})
+
+// Watch for changes to points
+watch(() => [...props.points], () => {
+  drawSparkline()
+}, { deep: true })
 </script>
 
 <template>
-  <svg :width="width" :height="height" viewBox="0 0 400 56" preserveAspectRatio="none" class="w-full">
-    <defs>
-      <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="rgb(20 169 255)" />
-        <stop offset="100%" stop-color="rgb(110 231 255)" />
-      </linearGradient>
-    </defs>
-    <path :d="pathD" fill="none" stroke="url(#spark)" :stroke-width="strokeWidth" stroke-linecap="round" />
-  </svg>
+  <div :style="containerStyle" class="sparkline-container">
+    <canvas ref="canvasRef" class="sparkline-canvas"></canvas>
+  </div>
 </template>
+
+<style scoped>
+.sparkline-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.sparkline-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+</style>

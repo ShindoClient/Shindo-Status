@@ -1,36 +1,118 @@
-import { ref, watchEffect } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 
-type Point = { t: number, count: number, latency: number | null }
+interface StatusData {
+  players?: {
+    count: number
+  }
+  latencyMs?: number | null
+  health?: {
+    ok: boolean
+  }
+}
 
-const MAX_POINTS = 60 // ~10s * 60 = 10 min
+interface HistoryPoint {
+  t: number
+  count: number
+  latency: number | null
+  ok: boolean
+}
 
-export function useStatusHistory(data: Ref<any>, pending: Ref<boolean>) {
-  const players = ref<Point[]>([])
-  const latency = ref<Point[]>([])
+export function useStatusHistory(data: Ref<StatusData | undefined>, loading: Ref<boolean>) {
+  const history = ref<HistoryPoint[]>([])
+  const maxPoints = 30 // Keep last 30 data points
+  let lastUpdate = 0
+  const updateInterval = 1000 // 1 second for initial load, then 5 seconds
 
-  watchEffect(() => {
-    try {
-      if (pending.value || !data.value) return
+  const addDataPoint = () => {
+    if (!data.value) return
+    
+    const now = Date.now()
+    
+    // Only add a new point if enough time has passed or it's the first point
+    if (history.value.length > 0 && now - lastUpdate < updateInterval) return
+    
+    lastUpdate = now
+    
+    const point: HistoryPoint = {
+      t: now,
+      count: data.value.players?.count ?? 0,
+      latency: data.value.latencyMs ?? null,
+      ok: data.value.health?.ok ?? false
+    }
 
-      const now = Date.now()
-      const count = data.value?.players?.count ?? 0
-      const lat = data.value?.latencyMs ?? null
+    // Add new point and keep only the last maxPoints
+    history.value = [...history.value.slice(-(maxPoints - 1)), point]
+  }
 
-      // Garante que os valores são números válidos
-      const safeCount = Number.isFinite(count) ? count : 0
-      const safeLat = Number.isFinite(lat) ? Number(lat) : null
-
-      players.value.push({ t: now, count: safeCount, latency: safeLat })
-      latency.value.push({ t: now, count: safeCount, latency: safeLat })
-
-      // Remove pontos antigos se exceder o máximo
-      if (players.value.length > MAX_POINTS) players.value.shift()
-      if (latency.value.length > MAX_POINTS) latency.value.shift()
-    } catch (error) {
-      console.error('Erro em useStatusHistory:', error)
-      // Mantém os dados anteriores em caso de erro
+  // Add initial point immediately when data is available
+  onMounted(() => {
+    if (data.value) {
+      addDataPoint()
     }
   })
 
-  return { players, latency }
+  // Watch for data changes and add points
+  watch(() => data.value, (newVal, oldVal) => {
+    if (newVal && !loading.value) {
+      addDataPoint()
+    }
+  }, { deep: true })
+
+  // Get players history in the format expected by PlayersHistoryCard
+  const players: ComputedRef<Array<{ t: number; count: number; latency: number | null }>> = computed(() => {
+    if (history.value.length === 0 && data.value) {
+      // If no history but we have data, create a point
+      return [{
+        t: Date.now(),
+        count: data.value.players?.count ?? 0,
+        latency: data.value.latencyMs ?? null
+      }]
+    }
+    return history.value.map(p => ({
+      t: p.t,
+      count: p.count,
+      latency: p.latency
+    }))
+  })
+
+  // Get latency history in the format expected by LatencyHistoryCard
+  const latency: ComputedRef<Array<{ t: number; latency: number }>> = computed(() => {
+    const points = history.value.length > 0 
+      ? history.value 
+      : (data.value ? [{
+          t: Date.now(),
+          count: data.value.players?.count ?? 0,
+          latency: data.value.latencyMs ?? null,
+          ok: data.value.health?.ok ?? false
+        }] : [])
+        
+    return points
+      .filter(p => p.latency !== null)
+      .map(p => ({
+        t: p.t,
+        latency: p.latency as number
+      }))
+  })
+
+  // Get uptime series in the format expected by UptimeChartCard
+  const uptimeSeries: ComputedRef<Array<{ t: number; ok: boolean }>> = computed(() => {
+    if (history.value.length === 0 && data.value) {
+      // If no history but we have data, create a point
+      return [{
+        t: Date.now(),
+        ok: data.value.health?.ok ?? false
+      }]
+    }
+    return history.value.map(p => ({
+      t: p.t,
+      ok: p.ok
+    }))
+  })
+
+  return {
+    players,
+    latency,
+    uptimeSeries
+  }
 }

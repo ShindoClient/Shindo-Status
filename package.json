@@ -9,12 +9,13 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "vercel-build": "nuxt build",
-    "release": "nuxt build && npx vercel deploy --prebuilt"
+    "release": "nuxt build && vercel deploy --prebuilt --prod"
   },
   "dependencies": {
     "@vueuse/core": "^11.3.0",
     "@vueuse/motion": "^2.2.6",
     "autoprefixer": "^10.4.21",
+    "chart.js": "^4.5.0",
     "h3": "^1.15.4",
     "lucide-vue-next": "^0.542.0",
     "nuxt": "^3.18.1",

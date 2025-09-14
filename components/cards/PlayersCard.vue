@@ -1,22 +1,13 @@
 <script setup lang="ts">
 import { Users } from 'lucide-vue-next'
-import Sparkline from '~/components/charts/Sparkline.vue'
 import BaseCard from './BaseCard.vue'
 
-interface Point {
-  t: number
-  count: number
-  latency?: number | null
-}
-
-const props = withDefaults(defineProps<{ 
-  loading?: boolean, 
-  count?: number, 
-  series?: Point[] 
+const props = withDefaults(defineProps<{
+  loading?: boolean,
+  count?: number
 }>(), {
   loading: false,
-  count: 0,
-  series: () => []
+  count: 0
 })
 
 // Garante que o valor seja um número válido
@@ -24,17 +15,6 @@ const last = computed(() => {
   if (props.loading) return 0
   const count = Number(props.count)
   return isFinite(count) ? Math.max(0, count) : 0
-})
-
-// Garante que series é sempre um array de pontos válidos
-const safeSeries = computed(() => {
-  if (!Array.isArray(props.series)) return []
-  return props.series
-    .map(p => ({
-      t: p?.t || 0,
-      count: typeof p?.count === 'number' ? Math.max(0, p.count) : 0
-    }))
-    .filter(Boolean)
 })
 </script>
 
@@ -59,18 +39,8 @@ const safeSeries = computed(() => {
         </div>
       </div>
 
-      <div class="mt-6">
-        <div class="h-16 -mx-2">
-          <Sparkline
-            :points="safeSeries.map(p => p?.count || 0)"
-            :height="64"
-            :stroke-width="2"
-            class="opacity-90"
-          />
-        </div>
-        <div class="mt-2 text-xs text-white/50 text-center">
-          Últimos minutos (atualiza a cada 10s)
-        </div>
+      <div class="mt-4 text-xs text-white/50">
+        Atualizado em tempo real
       </div>
     </div>
   </BaseCard>
