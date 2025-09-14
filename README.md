@@ -3,7 +3,7 @@
 <div align="center">
   <img src="assets/logo.png" style="width: 128px; height: auto;" alt="Shindo Logo">
 
-  # Shindo API
+  # Shindo Status
   <div align="center" style="margin: 15px 0">
     <a href="#status" style="margin: 0 5px">
       <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge" alt="Status do Projeto">
@@ -55,8 +55,8 @@
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/ShindoClient/Shindo-API.git
-   cd Shindo-API
+   git clone https://github.com/ShindoClient/Shindo-Status.git
+   cd Shindo-Status
    ```
 
 2. Instale as dependências:
